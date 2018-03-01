@@ -23,12 +23,27 @@ public class Rocket : MonoBehaviour
 
 	void processInput()
 	{
+//        Thusters
 		if (Input.GetKey(KeyCode.Space))
+		{
 			rb.AddRelativeForce(Vector3.up*ThrustForce * Time.deltaTime);
+			if (!GetComponent<AudioSource>().isPlaying)
+				GetComponent<AudioSource>().Play();
+		}
+		else if (GetComponent<AudioSource>().isPlaying)
+			GetComponent<AudioSource>().Stop();
+
+		//        Rotation
 		if (Input.GetKey(KeyCode.S))
 			transform.Rotate(Vector3.forward, -Rotationspeed * Time.deltaTime);
 		else if (Input.GetKey(KeyCode.A))
 			transform.Rotate(Vector3.forward, Rotationspeed * Time.deltaTime);
 
+//        Restart With Key R
+		if (Input.GetKey(KeyCode.R))
+		{
+			transform.position = new Vector3(0, 3.043795f, 0);
+			transform.rotation = Quaternion.Euler(new Vector3(0f, 0f, 0f));
+		}
 	}
 }
