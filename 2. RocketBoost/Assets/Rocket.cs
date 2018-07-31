@@ -2,11 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.WSA.Input;
 
 public class Rocket : MonoBehaviour
 {
 	private Rigidbody rb;
 	private int ThrustForce;
+
+	private bool landed;
+	private bool crashed;
 
 	[SerializeField] float thrustForce = 1000f;
 	[SerializeField] float Rotationspeed = 142f;
@@ -14,6 +18,8 @@ public class Rocket : MonoBehaviour
 	void Start ()
 	{
 		rb = GetComponent<Rigidbody>();
+		landed = true;
+		crashed = false;
 	}
 	
 	// Update is called once per frame
@@ -21,10 +27,18 @@ public class Rocket : MonoBehaviour
 	{
 		Thrust();
 		Rotate();
-		
+		Restart();
+		ToggleGravity();
+
 	}
 
-
+	private void ToggleGravity()
+	{
+		if (Input.GetKey(KeyCode.G))
+		{
+			rb.useGravity = !rb.useGravity;
+		}
+	}
 
 	void FixedUpdate()
 	{
@@ -36,36 +50,41 @@ public class Rocket : MonoBehaviour
 
 	void OnCollisionEnter(Collision collision)
 	{
-		print("Crashed!");
+		switch (collision.gameObject.tag)
+		{
+			case "Friend":
+				break;
+			case "Obsticle":
+				crashed = true;
+				break;
+			
+		}
 	}
 
 
 	void Landing()
 	{
-		if (Input.GetKey(KeyCode.L))
+	   
+		if (Input.GetKey(KeyCode.L) && (rb.rotation.z > 0.01f || rb.rotation.z < -0.01f))
 		{
+			landed = false;}
+
+		if (!landed)
+		{
+		    rb.constraints = RigidbodyConstraints.FreezeAll;
+		    rb.constraints = RigidbodyConstraints.FreezeRotation;
 			rb.freezeRotation = true;
 			print("LAND");
-			if (rb.rotation.z > 0)
+			if (rb.rotation.z > 0.01f)
 			{
-				for (float i = rb.rotation.z; i > 0; i-=0.02f)
-				{
-					print(i);
-					Vector3 eulVec = new Vector3(rb.rotation.x, rb.rotation.y, i);
-
-					Quaternion rotQuaternion = Quaternion.Euler(eulVec*Time.deltaTime);
-					rb.MoveRotation(rotQuaternion);
-				}
-			}else if (rb.rotation.z < 0)
+				transform.Rotate(Vector3.back, 160* Time.deltaTime);
+			}else if (rb.rotation.z < -0.01f)
 			{
-				for (float i = rb.rotation.z; i < 0; i+=0.02f)
-				{
-					print(i);
-					Vector3 eulVec = new Vector3(rb.rotation.x, rb.rotation.y, i);
-
-					Quaternion rotQuaternion = Quaternion.Euler(eulVec * Time.deltaTime);
-					rb.MoveRotation(rotQuaternion);
-				}
+				transform.Rotate(Vector3.back, -160 * Time.deltaTime);
+			}
+			else
+			{
+				landed = true;
 			}
 		}
 	}
@@ -76,15 +95,24 @@ public class Rocket : MonoBehaviour
 		rb.freezeRotation = true;
 		//        Rotation
 		if (Input.GetKey(KeyCode.S))
-			transform.Rotate(Vector3.forward, -Rotationspeed * Time.deltaTime);
-		else if (Input.GetKey(KeyCode.A))
-			transform.Rotate(Vector3.forward, Rotationspeed * Time.deltaTime);
+		{
 
+			transform.Rotate(Vector3.forward, -Rotationspeed * Time.deltaTime);
+		}else if (Input.GetKey(KeyCode.A))
+		{
+
+			transform.Rotate(Vector3.forward, Rotationspeed * Time.deltaTime);
+		}
 		rb.freezeRotation = false;
 
-		//        Restart With Key R
-		if (Input.GetKey(KeyCode.R))
+	}
+
+	private void Restart()
+	{
+		if (Input.GetKey(KeyCode.R) || crashed)
 		{
+			landed = true;
+			crashed = false;
 			rb.freezeRotation = true;
 			transform.position = new Vector3(0, 3.043795f, 0);
 			transform.rotation = Quaternion.Euler(new Vector3(0f, 0f, 0f));
