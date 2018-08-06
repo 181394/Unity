@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.XR.WSA.Input;
 
 public class Rocket : MonoBehaviour
@@ -71,8 +72,8 @@ public class Rocket : MonoBehaviour
 
 		if (!landed)
 		{
-		    rb.constraints = RigidbodyConstraints.FreezeAll;
-		    rb.constraints = RigidbodyConstraints.FreezeRotation;
+			rb.constraints = RigidbodyConstraints.FreezeAll;
+			rb.constraints = RigidbodyConstraints.FreezeRotation;
 			rb.freezeRotation = true;
 			print("LAND");
 			if (rb.rotation.z > 0.01f)
@@ -111,11 +112,18 @@ public class Rocket : MonoBehaviour
 	{
 		if (Input.GetKey(KeyCode.R) || crashed)
 		{
-			landed = true;
-			crashed = false;
-			rb.freezeRotation = true;
-			transform.position = new Vector3(0, 3.043795f, 0);
-			transform.rotation = Quaternion.Euler(new Vector3(0f, 0f, 0f));
+			//Restart at Scene
+			SceneManager.LoadScene("Level 1");
+			
+			//Restart current level
+			//Application.LoadLevel(Application.loadedLevel);
+
+			//Restart at Position
+			//landed = true;
+			//crashed = false;
+			//rb.freezeRotation = true;
+			//transform.position = new Vector3(0, 3.043795f, 0);
+			//transform.rotation = Quaternion.Euler(new Vector3(0f, 0f, 0f));
 		}
 	}
 
